@@ -1,0 +1,168 @@
+
+<h2 class="sr-only">Tablero de estado del reparto judicial – David G, junio 2026. 114 carpetas totales: 86 activas, 14 desistidas, 14 inactivas o sin proceso.</h2>
+
+<div style="padding:0.75rem 0 1.5rem;">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.25rem;">
+    <span style="font-size:15px;font-weight:500;">Reparto junio 2026</span>
+    <span style="font-size:12px;color:var(--color-text-secondary);">David G · División Jurídica COFREM</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;">
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;">
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px;">Total carpetas</div>
+      <div style="font-size:26px;font-weight:500;line-height:1.1;">114</div>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;">
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px;">Activas</div>
+      <div style="font-size:26px;font-weight:500;line-height:1.1;color:#185FA5;">86</div>
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:1px;">75 % del total</div>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;">
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px;">Desistidas</div>
+      <div style="font-size:26px;font-weight:500;line-height:1.1;color:#BA7517;">14</div>
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:1px;">12 % del total</div>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;">
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px;">Inactivas / sin proceso</div>
+      <div style="font-size:26px;font-weight:500;line-height:1.1;color:#888780;">14</div>
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:1px;">12 % del total</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:210px 1fr;gap:1.25rem;align-items:start;margin-bottom:1.25rem;">
+    <div>
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;">Estado (observación)</div>
+      <div style="position:relative;width:100%;height:215px;">
+        <canvas id="donutChart" role="img" aria-label="Donut: 86 activas, 14 desistidas, 4 sin proceso, 3 inactivo-archivado, 3 terminado por pago, 2 inactivo-rechazado, 2 otras">86 activas (75 %). 14 desistidas (12 %). 14 inactivas o sin proceso (12 %).</canvas>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:2;">
+          <div style="font-size:30px;font-weight:500;color:#185FA5;line-height:1.1;">86</div>
+          <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:1px;letter-spacing:.04em;">ACTIVAS</div>
+        </div>
+      </div>
+      <div id="donut-legend" style="margin-top:10px;display:flex;flex-direction:column;gap:5px;"></div>
+    </div>
+
+    <div>
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:4px;">Última actuación procesal (categorizada)</div>
+      <div id="bar-key" style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:10px;color:var(--color-text-secondary);margin-bottom:8px;"></div>
+      <div style="position:relative;width:100%;height:560px;">
+        <canvas id="barChart" role="img" aria-label="Barras horizontales de última actuación: Aprueba liquidación 30, Desistimiento tácito 14, Traslado art.446 9, No tiene en cuenta 9, y otras categorías">La última actuación más frecuente es aprobación de liquidación (30 casos).</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;">Año de la última actuación <span style="font-weight:400;color:var(--color-text-tertiary);">(110 carpetas con fecha registrada)</span></div>
+    <div style="position:relative;width:100%;height:165px;">
+      <canvas id="yearChart" role="img" aria-label="Barras por año de última actuación: pico en 2024 con 38 casos, 20 en 2022, 19 en 2023">Pico en 2024 (38 casos). Concentración entre 2021 y 2024.</canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script>
+const D = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const tc = D ? 'rgba(255,255,255,0.52)' : 'rgba(0,0,0,0.48)';
+const gc = D ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+const bc = D ? '#131313' : '#ffffff';
+
+Chart.register(ChartDataLabels);
+
+const dColors = ['#185FA5','#BA7517','#888780','#444441','#3B6D11','#E24B4A','#A32D2D','#534AB7'];
+const dLabels = ['Activo','Desistido','Sin proceso','Inactivo/archivado','Terminado por pago','Inactivo/rechazado','Rechazada de plano','Mandamiento negado'];
+const dData   = [86,14,4,3,3,2,1,1];
+
+new Chart(document.getElementById('donutChart'),{
+  type:'doughnut',
+  data:{labels:dLabels,datasets:[{data:dData,backgroundColor:dColors,borderWidth:2,borderColor:bc,hoverOffset:6}]},
+  options:{
+    responsive:true,maintainAspectRatio:false,cutout:'70%',
+    plugins:{
+      legend:{display:false},
+      datalabels:{display:false},
+      tooltip:{callbacks:{label:c=>` ${c.parsed} — ${Math.round(c.parsed/114*100)} %`}}
+    }
+  }
+});
+
+const leg = document.getElementById('donut-legend');
+dLabels.forEach((l,i)=>{
+  const d = document.createElement('div');
+  d.style.cssText='display:flex;align-items:center;gap:7px;font-size:11px;color:var(--color-text-secondary);line-height:1.5;';
+  d.innerHTML=`<span style="width:8px;height:8px;border-radius:2px;background:${dColors[i]};flex-shrink:0;"></span><span style="flex:1;">${l}</span><span style="font-weight:500;">${dData[i]}</span>`;
+  leg.appendChild(d);
+});
+
+const keyGroups = [
+  {label:'Favorable',color:'#3B6D11'},{label:'En trámite',color:'#185FA5'},
+  {label:'Terminado',color:'#BA7517'},{label:'Adverso',color:'#E24B4A'},
+  {label:'Acción pendiente',color:'#534AB7'},{label:'Otro',color:'#888780'}
+];
+const keyEl = document.getElementById('bar-key');
+keyGroups.forEach(g=>{
+  const s = document.createElement('span');
+  s.style.cssText='display:flex;align-items:center;gap:4px;';
+  s.innerHTML=`<span style="width:7px;height:7px;border-radius:1px;background:${g.color};flex-shrink:0;"></span>${g.label}`;
+  keyEl.appendChild(s);
+});
+
+const bRaw = [
+  {l:'Aprueba liquidación',       n:30, c:'#3B6D11'},
+  {l:'Desistimiento tácito',      n:14, c:'#BA7517'},
+  {l:'Traslado liq. art. 446',    n:9,  c:'#185FA5'},
+  {l:'No tiene en cuenta liq.',   n:9,  c:'#D85A30'},
+  {l:'Elaboración/memorial',      n:8,  c:'#534AB7'},
+  {l:'Pago/archivo/trámites fin.',n:8,  c:'#1D9E75'},
+  {l:'Modifica liquidación',      n:7,  c:'#EF9F27'},
+  {l:'Niega actualización',       n:7,  c:'#E24B4A'},
+  {l:'Medida cautelar',           n:7,  c:'#378ADD'},
+  {l:'Otros/insolvencia',         n:7,  c:'#888780'},
+  {l:'Sin actuación registrada',  n:4,  c:'#B4B2A9'},
+  {l:'Rechaza demanda',           n:4,  c:'#A32D2D'},
+].sort((a,b)=>b.n-a.n);
+
+new Chart(document.getElementById('barChart'),{
+  type:'bar',
+  data:{
+    labels:bRaw.map(d=>d.l),
+    datasets:[{data:bRaw.map(d=>d.n),backgroundColor:bRaw.map(d=>d.c),borderWidth:0,borderRadius:3}]
+  },
+  options:{
+    indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    layout:{padding:{right:38}},
+    plugins:{
+      legend:{display:false},
+      datalabels:{anchor:'end',align:'end',color:tc,font:{size:11,weight:'500'},formatter:v=>v},
+      tooltip:{callbacks:{label:c=>` ${c.parsed.x} casos`}}
+    },
+    scales:{
+      x:{ticks:{color:tc,font:{size:11}},grid:{color:gc},border:{display:false}},
+      y:{ticks:{color:tc,font:{size:11},padding:4},grid:{display:false}}
+    }
+  }
+});
+
+const yCounts = [1,1,1,5,12,20,19,38,9,4];
+const yColor = v=>{ const r=v/38; return D?`rgba(55,138,221,${(0.28+r*0.72).toFixed(2)})`:`rgba(24,95,165,${(0.18+r*0.82).toFixed(2)})`; };
+
+new Chart(document.getElementById('yearChart'),{
+  type:'bar',
+  data:{
+    labels:['2015','2018','2019','2020','2021','2022','2023','2024','2025','2026'],
+    datasets:[{data:yCounts,backgroundColor:yCounts.map(yColor),borderWidth:0,borderRadius:3}]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:18}},
+    plugins:{
+      legend:{display:false},
+      datalabels:{anchor:'end',align:'top',color:tc,font:{size:10},formatter:v=>v===0?'':v}
+    },
+    scales:{
+      x:{ticks:{color:tc,font:{size:11},autoSkip:false,maxRotation:0},grid:{display:false}},
+      y:{ticks:{color:tc,font:{size:11}},grid:{color:gc},border:{display:false}}
+    }
+  }
+});
+</script>
